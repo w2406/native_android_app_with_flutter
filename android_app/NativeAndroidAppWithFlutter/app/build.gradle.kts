@@ -26,6 +26,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        create("profile") {
+            initWith(getByName("debug"))
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -58,4 +61,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.navigation.compose)
+
+    // flutterモジュール
+    debugImplementation(libs.flutter.debug)
+    releaseImplementation(libs.flutter.release)
+    add("profileImplementation", "com.example.flutter_module:flutter_profile:1.0")
 }
