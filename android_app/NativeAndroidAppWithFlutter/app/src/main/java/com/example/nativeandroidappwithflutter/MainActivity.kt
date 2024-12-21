@@ -19,6 +19,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.nativeandroidappwithflutter.screens.PageOnAndroidScreen
 import com.example.nativeandroidappwithflutter.ui.theme.NativeAndroidAppWithFlutterTheme
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
 
 enum class Screen {
     Main,
@@ -26,9 +29,32 @@ enum class Screen {
     Flutter
 }
 
+// FlutterEngineのキャッシュキー
+const val flutterEngineId = "flutter_engine_id"
+
 class MainActivity : ComponentActivity() {
+    private lateinit var flutterEngine: FlutterEngine
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 毎回FlutterEngineが作られることで、リソースが無駄・起動が遅くになるのでFlutterEngineをキャッシュに保持
+        // Flutterエンジンを事前にインスタンス化
+        flutterEngine = FlutterEngine(this)
+
+        // FlutterEngineに初期ルートを設定
+        flutterEngine.navigationChannel.setInitialRoute("/");
+
+        // FlutterEngineの初期化
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
+
+        // FlutterEngineを保持して使いまわせるようにする
+        FlutterEngineCache
+            .getInstance()
+            .put(flutterEngineId, flutterEngine)
+
         setContent {
             NativeAndroidAppWithFlutterTheme {
                 val navController = rememberNavController()
@@ -72,9 +98,8 @@ fun PageOnFlutterButton() {
     Button(onClick = {
         // 遷移処理
         context.startActivity(
-            FlutterActivity.withNewEngine()
-                // flutterで表示させたい画面の初期ルート
-                .initialRoute("/")
+            FlutterActivity
+                .withCachedEngine(flutterEngineId)
                 .build(context)
         )
     }) {
