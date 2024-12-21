@@ -11,12 +11,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.nativeandroidappwithflutter.screens.PageOnAndroidScreen
 import com.example.nativeandroidappwithflutter.ui.theme.NativeAndroidAppWithFlutterTheme
+import io.flutter.embedding.android.FlutterActivity
 
 enum class Screen {
     Main,
@@ -53,7 +55,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(navController: NavController) {
     Column {
         PageOnAndroidButton(navController)
-        PageOnFlutterButton(navController)
+        PageOnFlutterButton()
     }
 }
 
@@ -65,9 +67,16 @@ fun PageOnAndroidButton(navController: NavController) {
 }
 
 @Composable
-fun PageOnFlutterButton(navController: NavController) {
+fun PageOnFlutterButton() {
+    val context = LocalContext.current
     Button(onClick = {
         // 遷移処理
+        context.startActivity(
+            FlutterActivity.withNewEngine()
+                // flutterで表示させたい画面の初期ルート
+                .initialRoute("/")
+                .build(context)
+        )
     }) {
         Text("Flutterで作成された画面")
     }
